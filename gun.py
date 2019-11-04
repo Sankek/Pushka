@@ -110,12 +110,36 @@ class Target:
         self.live = 1
 
     def new_target(self):
-        x = self.x = rnd(600, 780)
-        y = self.y = rnd(300, 550)
+        x = self.x = rnd(500, 750)
+        y = self.y = rnd(50, 550)
         r = self.r = rnd(2, 50)
+        self.vx = rnd(-5, 5)
+        self.vy = rnd(-10, 10)
         color = self.color = 'red'
         canv.coords(self.id, x-r, y-r, x+r, y+r)
         canv.itemconfig(self.id, fill=color)
+
+    def set_coords(self):
+        canv.coords(self.id, self.x-self.r, self.y-self.r, self.x+self.r, self.y+self.r)
+
+    def move(self):
+        if 50 <= self.y <= 550 and 500 <= self.x <= 750:
+            self.y -= self.vy
+            self.x += self.vx
+            self.set_coords()
+        else:
+            if self.y > 550:
+                self.vy = -self.vy
+                self.y = 550
+            if self.y < 50:
+                self.vy = -self.vy
+                self.y = 50
+            if self.x > 750:
+                self.vx = -self.vx
+                self.x = 750
+            if self.x < 500:
+                self.vx = -self.vx
+                self.x = 500
 
     def hit(self, points=1):
         global score
@@ -132,7 +156,6 @@ g1 = Gun()
 bullet = 0
 score = 0
 balls = []
-targets = []
 
 
 def new_game(event=''):
@@ -147,6 +170,10 @@ def new_game(event=''):
     t1.live = 1
     t2.live = 1
     while (t1.live or t2.live) or balls:
+        if t1.live:
+            t1.move()
+        if t2.live:
+            t2.move()
         for b in balls:
             b.move()
             if b.hittest(t1) and t1.live:
@@ -162,6 +189,7 @@ def new_game(event=''):
                 canv.bind('<ButtonRelease-1>', '')
                 canv.itemconfig(screen1, text='Вы уничтожили цели за  '
                                               + str(bullet) + ' выстрелов')
+
 
         canv.update()
         time.sleep(0.02)
